@@ -1,4 +1,7 @@
 import json
+# In-memory conversation context (per chat)
+USER_CONTEXT = {}
+
 from threading import Thread
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 
