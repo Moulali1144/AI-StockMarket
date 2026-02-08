@@ -1,0 +1,48 @@
+def handle_text(update, context):
+    text = update.message.text.strip().lower()
+
+    # 1️⃣ Greeting
+    if text in ["hi", "hello", "hey"]:
+        update.message.reply_text(
+            "Hi 👋 How can I help you today?\n\n"
+            "• Type a stock name (RELIANCE, CONCOR)\n"
+            "• Ask about market / F&O / RBI / global news"
+        )
+        return
+
+    # 2️⃣ Detect stock symbol (simple & safe)
+    symbol = text.upper()
+    is_stock = symbol.isalpha() and len(symbol) <= 12
+
+    # 3️⃣ Market / F&O questions
+    market_keywords = [
+        "market", "f&o", "fn0", "expiry",
+        "nifty", "banknifty",
+        "rbi", "govt", "government",
+        "global", "us market", "dow", "nasdaq"
+    ]
+
+    if any(k in text for k in market_keywords):
+        update.message.reply_text(
+            get_market_context_analysis()
+        )
+        return
+
+    # 4️⃣ Stock analysis (works even on Sunday)
+    if is_stock:
+        try:
+            analysis = get_stock_analysis(symbol)
+            update.message.reply_text(analysis)
+            return
+        except Exception:
+            pass
+
+    # 5️⃣ Fallback
+    update.message.reply_text(
+        "❓ I didn’t understand that.\n\n"
+        "Try:\n"
+        "• RELIANCE\n"
+        "• CONCOR\n"
+        "• Market outlook\n"
+        "• RBI news"
+    )
