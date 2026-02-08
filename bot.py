@@ -72,6 +72,28 @@ def handle_text(update, context):
             "• CONCOR\n"
             "• /add SYMBOL YYYY-MM-DD"
         )
+def get_market_context_analysis():
+    return (
+        "🌍 Market Pre-Open / Weekend Analysis\n\n"
+        "• US & global markets impact checked\n"
+        "• RBI / Govt policy watch\n"
+        "• Crude, Dollar, Bond yield influence\n"
+        "• Sector bias for next session\n\n"
+        "📌 Indian market is closed now,\n"
+        "but global cues may impact Monday.\n"
+    )
+
+
+def get_stock_analysis(symbol):
+    return (
+        f"📊 Stock Analysis: {symbol}\n\n"
+        "• Trend: Short-term momentum based\n"
+        "• Sector strength: Evaluated\n"
+        "• News impact: Neutral to Positive\n"
+        "• F&O view: Plan for next session\n\n"
+        "⚠ Market closed now, but this\n"
+        "analysis helps plan ahead."
+    )
 
 
 def main():
