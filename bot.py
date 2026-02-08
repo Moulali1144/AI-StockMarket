@@ -21,7 +21,7 @@ def save(data):
 def start(update, context):
     update.message.reply_text(
         "Hi 👋 How can I help you today?\n\n"
-        "• Type a stock name (example: RELIANCE, CONCOR)\n"
+        "• Type a stock name (RELIANCE, CONCOR)\n"
         "• Use /add SYMBOL YYYY-MM-DD to track F&O"
     )
 
@@ -38,35 +38,35 @@ def add(update, context):
         update.message.reply_text("✅ Stock added for tracking")
     except Exception:
         update.message.reply_text(
-            "Usage:\n/add RELIANCE 2026-02-14"
+            "❌ Usage:\n/add RELIANCE 2026-02-14"
         )
 
 
 def handle_text(update, context):
-    text = update.message.text.upper()
+    text = update.message.text.strip().upper()
 
-    # ✅ Market holiday check
+    # Market holiday check
     holiday, reason = is_holiday()
     if holiday:
         update.message.reply_text(
             f"📅 Market is closed today due to {reason}.\n\n"
             "You can still ask for:\n"
             "• Stock analysis\n"
-            "• F&O planning for next session"
+            "• F&O planning"
         )
         return
 
-    # ✅ Try live NSE price
+    # Live NSE price check
     try:
         price = live_price(text)
         update.message.reply_text(
-            f"📊 {text} LIVE NSE PRICE\n\n"
-            f"Price: ₹{price}\n\n"
-            "This is near real-time NSE data."
+            f"📊 {text} — LIVE NSE PRICE\n\n"
+            f"₹ {price}\n\n"
+            "⏱ Near real-time NSE data"
         )
     except Exception:
         update.message.reply_text(
-            "❓ I couldn’t recognize that.\n\n"
+            "❓ I didn’t understand that.\n\n"
             "Try:\n"
             "• RELIANCE\n"
             "• CONCOR\n"
@@ -75,7 +75,7 @@ def handle_text(update, context):
 
 
 def main():
-    updater = Updater(BOT_TOKEN, use_context=True)
+    updater = Updater(token=BOT_TOKEN, use_context=True)
     dispatcher = updater.dispatcher
 
     dispatcher.add_handler(CommandHandler("start", start))
@@ -86,7 +86,7 @@ def main():
 
     updater.start_polling()
 
-    # Start auto-alert thread
+    # Start auto alert thread safely
     updates = updater.bot.get_updates()
     if updates:
         chat_id = updates[-1].message.chat.id
