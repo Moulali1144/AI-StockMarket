@@ -1,6 +1,4 @@
 import json
-# In-memory conversation context (per chat)
-USER_CONTEXT = {}
 
 from threading import Thread
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
@@ -9,7 +7,8 @@ from config import BOT_TOKEN
 from holiday import is_holiday
 from nse_live import live_price
 from alert_engine import auto_alert
-
+# In-memory conversation context (per chat)
+USER_CONTEXT = {}
 
 def load():
     with open("data.json") as f:
