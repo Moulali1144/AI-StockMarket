@@ -2,7 +2,7 @@ def handle_text(update, context):
     chat_id = update.message.chat_id
     text = update.message.text.strip().lower()
 
-    # Init context
+    # Initialize context for user
     if chat_id not in USER_CONTEXT:
         USER_CONTEXT[chat_id] = {
             "last_stock": None,
@@ -14,15 +14,15 @@ def handle_text(update, context):
     # 1️⃣ Greeting
     if text in ["hi", "hello", "hey"]:
         update.message.reply_text(
-            "Hi 👋 I can help with:\n\n"
-            "• Stock analysis (CONCOR, RELIANCE)\n"
-            "• F&O planning\n"
-            "• RBI / Govt / Global market impact\n\n"
-            "Ask freely, I’ll remember context 🙂"
+            "Hi 👋 I remember context.\n\n"
+            "• Say a stock name (CONCOR, RELIANCE)\n"
+            "• Then ask F&O / news / impact\n\n"
+            "Example:\n"
+            "CONCOR → F&O"
         )
         return
 
-    # 2️⃣ Stock name detection
+    # 2️⃣ Stock name
     if text.isalpha() and len(text) <= 12:
         symbol = text.upper()
         ctx["last_stock"] = symbol
@@ -33,12 +33,12 @@ def handle_text(update, context):
             try:
                 price = live_price(symbol)
                 update.message.reply_text(
-                    f"📊 {symbol} — LIVE NSE PRICE\n\n"
+                    f"📊 {symbol} LIVE PRICE\n\n"
                     f"₹ {price}\n\n"
-                    "You can ask:\n"
+                    "Now you can ask:\n"
                     "• F&O\n"
                     "• News impact\n"
-                    "• Trend"
+                    "• Monday outlook"
                 )
                 return
             except Exception:
@@ -47,25 +47,24 @@ def handle_text(update, context):
         update.message.reply_text(get_stock_analysis(symbol))
         return
 
-    # 3️⃣ F&O follow-up (USES LAST STOCK)
+    # 3️⃣ F&O follow-up (USES remembered stock)
     if "f&o" in text or "fno" in text or "expiry" in text:
         if ctx["last_stock"]:
             update.message.reply_text(
                 f"📈 F&O View for {ctx['last_stock']}\n\n"
-                "• Avoid expiry day trading\n"
-                "• Prefer 1–2 days before expiry\n"
-                "• Follow sector strength & news\n\n"
-                "⚠ Risk-managed planning only"
+                "• Best before expiry day\n"
+                "• Avoid expiry-day decay\n"
+                "• Trade with sector trend\n\n"
+                "⚠ Risk-managed planning"
             )
-            return
         else:
             update.message.reply_text(
-                "Please tell me the stock name first (e.g. CONCOR)"
+                "Please tell me the stock name first (example: CONCOR)"
             )
-            return
+        return
 
-    # 4️⃣ RBI / Govt / Global news
-    market_keywords = [
+    # 4️⃣ Macro / RBI / Global / Crude / Dollar
+    macro_keywords = [
         "rbi", "repo", "rate",
         "govt", "budget",
         "global", "us market", "dow", "nasdaq",
@@ -73,43 +72,42 @@ def handle_text(update, context):
         "dollar", "bond", "yield"
     ]
 
-    if any(k in text for k in market_keywords):
+    if any(k in text for k in macro_keywords):
         ctx["last_topic"] = "macro"
-
         update.message.reply_text(
-            "🌍 Macro Market Impact Analysis\n\n"
-            "• Crude ↑ → Inflation pressure → RBI cautious\n"
+            "🌍 Macro Impact Analysis\n\n"
+            "• Crude ↑ → inflation pressure\n"
             "• Dollar ↑ → FII outflow risk\n"
-            "• Bond yields ↑ → Equity valuation pressure\n\n"
-            "📌 These factors can impact Monday’s market\n"
-            "Ask: 'Impact on my stock?'"
+            "• Bond yields ↑ → equity pressure\n\n"
+            "You can now ask:\n"
+            "• Impact on Monday\n"
+            "• Impact on my stock"
         )
         return
 
-    # 5️⃣ Follow-up: impact on Monday / impact on stock
+    # 5️⃣ Impact follow-up
     if "impact" in text or "monday" in text or "effect" in text:
         if ctx["last_stock"]:
             update.message.reply_text(
                 f"📊 Expected Impact on {ctx['last_stock']}\n\n"
-                "• Gap-up/down depends on global cues\n"
-                "• Sector reaction matters more than stock alone\n"
-                "• Watch first 15 minutes for direction\n\n"
-                "⚠ Avoid aggressive trades at open"
+                "• Global cues may cause gap-up/down\n"
+                "• Sector reaction is key\n"
+                "• First 15 minutes = direction\n\n"
+                "⚠ Avoid aggressive opening trades"
             )
-            return
         else:
             update.message.reply_text(
                 "Impact depends on the stock.\n"
                 "Please mention the stock name."
             )
-            return
+        return
 
-    # 6️⃣ Fallback (SMART)
+    # 6️⃣ Fallback
     update.message.reply_text(
-        "I’m not sure yet 🤔\n\n"
-        "You can ask:\n"
-        "• A stock name (CONCOR)\n"
+        "🤔 I’m not sure yet.\n\n"
+        "Try:\n"
+        "• CONCOR\n"
         "• F&O\n"
-        "• RBI / crude / dollar impact\n"
-        "• Market impact on Monday"
+        "• RBI news\n"
+        "• Impact on Monday"
     )
