@@ -1,23 +1,18 @@
 import time
 from market_time import market_open_now
-from trend import trend_prediction
-from sector import sector_strength
-from news import get_market_news
-from ai import news_sentiment
-from rules import expiry_before, final_decision
-def auto_alert(bot,chat_id,stocks,interval):
-    last_signal={}
-    while True:
-        if not market_open_now():
-            time.sleep(300); continue
-        for s in stocks:
-            trend=trend_prediction(s["stock"])
-            sector=sector_strength(s["stock"])
-            news=get_market_news(s["stock"])
-            sentiment=news_sentiment(news)
-            expiry_ok=expiry_before(s["expiry"])
-            decision=final_decision(trend,sentiment,sector,expiry_ok)
-            if last_signal.get(s["stock"])!=decision:
-                bot.send_message(chat_id=chat_id,text=f"📢 AUTO ALERT\n\nStock: {s['stock']}\nTrend: {trend}\nSector: {sector}\nSentiment: {sentiment}\n👉 Action: {decision}")
-                last_signal[s["stock"]]=decision
-        time.sleep(interval)
+from nse_live import live_price
+from news import market_news
+from sentiment import sentiment_score
+from sector_rank import sector_rank
+from rules import expiry_ok
+from confidence import confidence
+
+def auto_alert(bot,chat_id,stocks): last={}
+ while True:
+  if not market_open_now(): time.sleep(300); continue
+  for s in stocks:
+   p=live_price(s['stock']); sent=sentiment_score(market_news(s['stock'])); sec=sector_rank()[0][1]; conf=confidence('MOVE',sec,sent,expiry_ok(s['expiry']))
+   if last.get(s['stock'])!=conf:
+    bot.send_message(chat_id=chat_id,text=f'📢 LIVE ALERT\n{s['stock']} ₹{p}\nSentiment:{sent}\nConfidence:{conf}')
+    last[s['stock']]=conf
+  time.sleep(300)

@@ -1,3 +1,3 @@
 import os
-BOT_TOKEN = os.getenv("BOT_TOKEN")
-CHECK_INTERVAL = 900
+BOT_TOKEN=os.getenv('BOT_TOKEN')
+CHECK_INTERVAL=300

@@ -1,0 +1,1 @@
+def confidence(trend,sector,sentiment,expiry_ok): sc=0; sc+=30 if trend!='SIDEWAYS' else 0; sc+=25 if sector>0 else 0; sc+=25 if sentiment>0 else 0; sc+=20 if expiry_ok else 0; return 'HIGH' if sc>=75 else 'MEDIUM' if sc>=45 else 'LOW'
