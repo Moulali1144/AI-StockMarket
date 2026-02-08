@@ -22,7 +22,7 @@ def start(update, context):
     update.message.reply_text(
         "Hi 👋 How can I help you today?\n\n"
         "• Type a stock name (RELIANCE, CONCOR)\n"
-        "• Use /add SYMBOL YYYY-MM-DD to track F&O"
+        "• Ask about market / F&O / RBI / global news"
     )
 
 
@@ -42,57 +42,85 @@ def add(update, context):
         )
 
 
-def handle_text(update, context):
-    text = update.message.text.strip().upper()
-
-    # Market holiday check
-    holiday, reason = is_holiday()
-    if holiday:
-        update.message.reply_text(
-            f"📅 Market is closed today due to {reason}.\n\n"
-            "You can still ask for:\n"
-            "• Stock analysis\n"
-            "• F&O planning"
-        )
-        return
-
-    # Live NSE price check
-    try:
-        price = live_price(text)
-        update.message.reply_text(
-            f"📊 {text} — LIVE NSE PRICE\n\n"
-            f"₹ {price}\n\n"
-            "⏱ Near real-time NSE data"
-        )
-    except Exception:
-        update.message.reply_text(
-            "❓ I didn’t understand that.\n\n"
-            "Try:\n"
-            "• RELIANCE\n"
-            "• CONCOR\n"
-            "• /add SYMBOL YYYY-MM-DD"
-        )
+# 🔹 MARKET CONTEXT (WORKS EVEN ON SUNDAY)
 def get_market_context_analysis():
     return (
         "🌍 Market Pre-Open / Weekend Analysis\n\n"
-        "• US & global markets impact checked\n"
-        "• RBI / Govt policy watch\n"
-        "• Crude, Dollar, Bond yield influence\n"
+        "• US & global markets impact\n"
+        "• RBI & Govt policy watch\n"
+        "• Crude, Dollar & Bond yields\n"
         "• Sector bias for next session\n\n"
         "📌 Indian market is closed now,\n"
-        "but global cues may impact Monday.\n"
+        "but global cues may impact Monday."
     )
 
 
+# 🔹 STOCK ANALYSIS (NO LIVE PRICE ON HOLIDAY)
 def get_stock_analysis(symbol):
     return (
         f"📊 Stock Analysis: {symbol}\n\n"
-        "• Trend: Short-term momentum based\n"
+        "• Trend: Short-term momentum\n"
         "• Sector strength: Evaluated\n"
         "• News impact: Neutral to Positive\n"
         "• F&O view: Plan for next session\n\n"
-        "⚠ Market closed now, but this\n"
-        "analysis helps plan ahead."
+        "⚠ Useful for planning, not live trading."
+    )
+
+
+def handle_text(update, context):
+    text = update.message.text.strip().lower()
+
+    # 1️⃣ Greeting
+    if text in ["hi", "hello", "hey"]:
+        update.message.reply_text(
+            "Hi 👋 How can I help you today?\n\n"
+            "• Type a stock name (RELIANCE, CONCOR)\n"
+            "• Ask about market / F&O / RBI / global news"
+        )
+        return
+
+    # 2️⃣ Market / RBI / Global questions
+    market_keywords = [
+        "market", "f&o", "fno", "expiry",
+        "nifty", "banknifty",
+        "rbi", "govt", "government",
+        "global", "us market", "dow", "nasdaq"
+    ]
+
+    if any(k in text for k in market_keywords):
+        update.message.reply_text(get_market_context_analysis())
+        return
+
+    # 3️⃣ Stock shortcut name (CONCOR, TCS, RELIANCE)
+    symbol = text.upper()
+    if symbol.isalpha() and len(symbol) <= 12:
+        holiday, reason = is_holiday()
+
+        # Market open → live price
+        if not holiday:
+            try:
+                price = live_price(symbol)
+                update.message.reply_text(
+                    f"📊 {symbol} — LIVE NSE PRICE\n\n"
+                    f"₹ {price}\n\n"
+                    "⏱ Near real-time NSE data"
+                )
+                return
+            except Exception:
+                pass
+
+        # Market closed → analysis
+        update.message.reply_text(get_stock_analysis(symbol))
+        return
+
+    # 4️⃣ Fallback
+    update.message.reply_text(
+        "❓ I didn’t understand that.\n\n"
+        "Try:\n"
+        "• RELIANCE\n"
+        "• CONCOR\n"
+        "• Market outlook\n"
+        "• RBI news"
     )
 
 
@@ -108,7 +136,7 @@ def main():
 
     updater.start_polling()
 
-    # Start auto alert thread safely
+    # Auto alert thread
     updates = updater.bot.get_updates()
     if updates:
         chat_id = updates[-1].message.chat.id
